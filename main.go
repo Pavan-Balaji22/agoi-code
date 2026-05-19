@@ -1,6 +1,6 @@
 package main
 
-import "ai-agent/api"
+import "agoi-code/api"
 
 func main() {
 	api.Serve()
