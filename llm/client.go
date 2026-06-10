@@ -2,7 +2,6 @@ package llm
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/ollama/ollama/api"
@@ -26,7 +25,7 @@ func NewOllamaClient(modelName string) *OllamaClient {
 	}
 }
 
-func (llm *OllamaClient) CallLLM(message string) {
+func (llm *OllamaClient) CallLLM(message string) (string, error) {
 	ctx := context.Background()
 	var response api.ChatResponse
 	llm.messages = append(llm.messages, api.Message{
@@ -44,8 +43,8 @@ func (llm *OllamaClient) CallLLM(message string) {
 		return nil
 	}
 	err := llm.client.Chat(ctx, req, respFunc)
-	fmt.Print(response.Message.Content)
 	if err != nil {
 		log.Println(err)
 	}
+	return response.Message.Content, err
 }
