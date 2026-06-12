@@ -1,7 +1,7 @@
 package main
 
 import (
-	"agoi-code/llm"
+	co "agoi-code/core"
 	"bufio"
 	"fmt"
 	"log"
@@ -22,15 +22,17 @@ func main() {
 	fmt.Println("Please chose a model ")
 	fmt.Printf(":> ")
 	model, err := reader.ReadString('\n')
-	llmClient := llm.NewOllamaClient(model)
+	llmClient := co.NewOllamaClient(model)
 	checkError(err)
+	response := make(chan string)
 	for {
 		fmt.Printf(":> ")
 		input, err := reader.ReadString('\n')
 		checkError(err)
-		res, err := llmClient.CallLLM(input)
+		// res, err := llmClient.CallLLM(input)
+		go llmClient.AsyncCallLLM(input, response)
 		checkError(err)
-		fmt.Printf("%s : %s \n", strings.Replace(model, "\n", "", 1), res)
+		fmt.Printf("\n%s : %s \n", strings.TrimSpace(model), <-response)
 
 	}
 

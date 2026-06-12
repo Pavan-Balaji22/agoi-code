@@ -1,4 +1,4 @@
-package llm
+package core
 
 import (
 	"context"
@@ -46,5 +46,32 @@ func (llm *OllamaClient) CallLLM(message string) (string, error) {
 	if err != nil {
 		log.Println(err)
 	}
+	llm.messages = append(llm.messages, response.Message)
 	return response.Message.Content, err
+}
+
+func (llm *OllamaClient) AsyncCallLLM(message string, res chan string) {
+	ctx := context.Background()
+	var response api.ChatResponse
+	llm.messages = append(llm.messages, api.Message{
+		Role:    "user",
+		Content: message,
+	})
+	stream := false
+	req := &api.ChatRequest{
+		Model:    llm.modelName,
+		Messages: llm.messages,
+		Stream:   &stream,
+	}
+	respFunc := func(resp api.ChatResponse) error {
+		response = resp
+		return nil
+	}
+	err := llm.client.Chat(ctx, req, respFunc)
+	if err != nil {
+		log.Println(err)
+	}
+	llm.messages = append(llm.messages, response.Message)
+	res <- response.Message.Content
+
 }
